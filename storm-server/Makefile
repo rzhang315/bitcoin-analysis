@@ -1,4 +1,7 @@
-.PHONY: listen deploy build
+.PHONY: listen deploy build init
+
+init:
+	pip install -r requirements.txt
 
 build:
 	cp config.json storm-project/multilang/resources/config.json

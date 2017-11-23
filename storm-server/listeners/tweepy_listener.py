@@ -58,6 +58,7 @@ def main():
     access_token_secret = config['twitter']['access_token_secret']
     consumer_key = config['twitter']['consumer_key']
     consumer_secret = config['twitter']['consumer_secret']
+    keywords = config['twitter']['keywords']
 
     # Authenticate to Twitter and create stream with KafkaListener as handler
     auth = OAuthHandler(consumer_key, consumer_secret)
@@ -65,7 +66,7 @@ def main():
     stream = Stream(auth, listener=KafkaListener(topic, kafka_producer))
 
     # Filter stream by keywords
-    stream.filter(track=['football'])
+    stream.filter(track=keywords)
 
 if __name__ == '__main__':
     main()

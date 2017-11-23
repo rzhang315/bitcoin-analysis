@@ -2,6 +2,7 @@
 
 init:
 	pip install -r requirements.txt
+	cp config_template.json config.json
 
 build:
 	cp config.json storm-project/multilang/resources/config.json

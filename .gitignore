@@ -9,3 +9,6 @@ log
 
 # Maven generated files
 target
+
+# Configuration file
+config.json

@@ -53,7 +53,7 @@ public static void main(String[] args) throws Exception {
 	TopologyBuilder builder = new TopologyBuilder();
 
 	builder.setSpout("twitter_spout", new TwitterSpout(), 5);
-	builder.setBolt("analysis_bolt", new DynamoBolt(), 8).shuffleGrouping("spout");
+	builder.setBolt("analysis_bolt", new DynamoBolt(), 8).shuffleGrouping("twitter_spout");
 
 	Config conf = new Config();
 	conf.setDebug(true);

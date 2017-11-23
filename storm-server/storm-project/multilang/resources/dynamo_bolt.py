@@ -10,8 +10,7 @@ from kafka import KafkaConsumer
 from decimal import Decimal
 
 # Load config file
-abs_path = os.path.dirname(os.path.abspath(__file__))
-with open('{}/../../../config.json'.format(abs_path)) as json_data_file:
+with open('config.json') as json_data_file:
     config = json.load(json_data_file)
 
 # Connect to DynamoDB

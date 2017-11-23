@@ -50,7 +50,7 @@ def main():
 
     # Load Kafka configuration and initialize Kafka producer
     servers = config['kafka']['servers']
-    topic = config['kafka']['topic']
+    topic = config['kafka']['topic']['twitter']
     kafka_producer = KafkaProducer(bootstrap_servers=servers)
 
     # Load Twitter access credentials

@@ -10,6 +10,7 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 from kafka import KafkaProducer
 import json
+import os
 
 # Listener that publishes data to Kafka queue
 class KafkaListener(StreamListener):
@@ -43,7 +44,8 @@ def main():
     print('Tweepy is listening...')
 
     # Load config file
-    with open('../config.json') as json_data_file:
+    abs_path = os.path.dirname(os.path.abspath(__file__))
+    with open('{}/../config.json'.format(abs_path)) as json_data_file:
         config = json.load(json_data_file)
 
     # Load Kafka configuration and initialize Kafka producer

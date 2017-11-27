@@ -1,0 +1,21 @@
+{
+    "twitter": {
+        "access_token": "MY_ACCESS_TOKEN",
+        "access_token_secret": "MY_ACCESS_TOKEN_SECRET",
+        "consumer_key": "MY_CONSUMER_KEY",
+        "consumer_secret": "MY_CONSUMER_SECRET",
+        "keywords": ["bitcoin"]
+    },
+    "kafka": {
+        "servers": ["MY_INTERNAL_IP:PORT"],
+        "topic": {
+            "twitter": "tweets",
+            "reddit": "posts"
+        }
+    },
+    "aws": {
+        "access_key": "MY_ACCESS_KEY",
+        "secret_key": "MY_SECRET_KEY",
+        "region": "us-east-1"
+    }
+}

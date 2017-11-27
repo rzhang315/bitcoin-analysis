@@ -47,7 +47,7 @@ class DynamoInsertBolt(storm.BasicBolt):
         sentiment = analyzeData(data)
 
         # Store analyzed results in DynamoDB
-        table = dynamodb.Table("tweet_sentiment")
+        table = dynamodb.Table(config['dynamodb']['twitter'])
         table.put_item(
             Item = {
                 'date': str(today),

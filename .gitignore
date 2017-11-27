@@ -1,0 +1,14 @@
+# Ignore python compiled files
+*.pyc
+log
+
+# Eclipse files
+.project
+.classpath
+.settings
+
+# Maven generated files
+target
+
+# Configuration file
+config.json

@@ -1,7 +1,7 @@
 .PHONY: listen deploy build init
 
 init:
-	pip install -r requirements.txt
+	pip install -t /usr/local/lib/python2.7/dist-packages -r requirements.txt
 	cp config_template.json config.json
 
 build:

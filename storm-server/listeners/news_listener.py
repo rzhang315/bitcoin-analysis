@@ -36,8 +36,7 @@ def main():
         output = resp.json()['articles']		
  
         output = sorted(output, key=lambda k: (k['publishedAt']), reverse=True)		
-        datas = []
-		
+    	
         #print output
         
         for article in output[0:10]:
@@ -47,11 +46,10 @@ def main():
             data['title'] = article['title'] 
             data['description'] = article['description'] 
             data['publishedAt'] = article['publishedAt'] 
-            datas.append(data)
             			
-        kafka_producer.send(topic, json.dumps(datas))
+            kafka_producer.send(topic, json.dumps(data))
 
-        print datas
+        #print datas
 		
         time.sleep(10)
     

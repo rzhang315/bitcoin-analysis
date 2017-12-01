@@ -38,7 +38,7 @@ def main():
             			
         kafka_producer.send(topic, json.dumps(data))
 
-        print data
+        #print data
 		
         time.sleep(10)
     

@@ -40,7 +40,7 @@ def main():
          			
         kafka_producer.send(topic, json.dumps(submission_dict))
 
-        print submission_dict
+        # print submission_dict
 		
         time.sleep(10)
     

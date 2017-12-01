@@ -96,7 +96,7 @@ public static class DynamoBolt extends ShellBolt implements IRichBolt {
 }
 
 public static class PriceBolt extends ShellBolt implements IRichBolt {
-	public DynamoBolt() {
+	public PriceBolt() {
 		super("python", "price_bolt.py");
 	}
 

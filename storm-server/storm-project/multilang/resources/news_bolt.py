@@ -5,6 +5,7 @@ import boto3
 import json
 import storm
 import os
+from sentiment import compute_sentiment
 from kafka import KafkaConsumer
 from decimal import Decimal
 
@@ -21,21 +22,43 @@ dynamodb = boto3.resource('dynamodb',
     aws_secret_access_key=secret_key,
     region_name=region)
 
-class PriceInsertBolt(storm.BasicBolt):
-    def process(self, tup):
-        # Load data from tuple ex:{'timestamp': u'2017-12-01T17:24:00+00:00', 'price': u'10,529.7513'}
-        data = tup.values[0]
+def analyzeData(data):
+    """
+    Analyze Twitter data.
 
-    	data = json.loads(json.loads(data))  
+    Args:
+        data (dict) : Twitter data dictionary
+
+    Returns:
+        analyzed data
+    """
+    return compute_sentiment(data)
+
+class NewsInsertBolt(storm.BasicBolt):
+    def process(self, tup):
+        # Load data from tuple
+        data = tup.values[0]
+    	data = json.loads(json.loads(data))
+
+        # Get today's date
+        today = date.today()
+
+        # Analyze data
+        sentiment = analyzeData(data)
 
         # Store analyzed results in DynamoDB
-        table = dynamodb.Table("bitcoin_price")
+        table = dynamodb.Table("news_sentiment")
         table.put_item(
-            Item = data
+            Item = {
+                'date': str(today),
+                'timestamp': str(data['publishedAt']),
+                'text': data['title'],
+                'sentiment': Decimal(sentiment)
+            }
         )
         # Emit for downstream bolts
         storm.emit([data])
 
-PriceInsertBolt().run()
+NewsInsertBolt().run()
 
 

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pandas import read_csv
 import math
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, LSTM, Dropout, Flatten, Activation
 
 # Global parameters
@@ -110,7 +110,7 @@ def main():
     np.random.seed(5)
 
     # Load dataset
-    dataframe = read_csv('./data/bitcoin_historical_bitstamp.csv', usecols=[4,5], engine='python')
+    dataframe = read_csv('./data/bitcoin_historical_bitstamp.csv', usecols=[4], engine='python')
 
     # Truncate data
     dataframe = dataframe[3045000:]
@@ -120,6 +120,13 @@ def main():
 
     # Create model and train it
     model = create_and_train_model(train_x, train_y, test_x, test_y, num_features)
+
+    # Save model to disk
+    model.save('model/model.h5')
+
+    del model
+
+    model = load_model('model/model.h5')
 
     # Generate predictions
     train_predict = model.predict(train_x)

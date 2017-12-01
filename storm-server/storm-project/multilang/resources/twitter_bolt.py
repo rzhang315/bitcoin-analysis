@@ -38,9 +38,9 @@ class TwitterInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
-        print data
+        #print data
     	data = json.loads(json.loads(data))
-        print data
+        #print data
 
         # Get today's date
         today = date.today()

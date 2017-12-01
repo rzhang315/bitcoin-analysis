@@ -26,7 +26,7 @@ class PriceInsertBolt(storm.BasicBolt):
         # Load data from tuple ex:{'timestamp': u'2017-12-01T17:24:00+00:00', 'price': u'10,529.7513'}
         data = tup.values		
     	data = json.loads(json.loads(data))  
-        print data
+        #print data
 		
         # Store analyzed results in DynamoDB
         table = dynamodb.Table("bitcoin_price")

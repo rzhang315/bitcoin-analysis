@@ -95,27 +95,43 @@ public static class DynamoBolt extends ShellBolt implements IRichBolt {
 	}
 }
 
+public static class PriceBolt extends ShellBolt implements IRichBolt {
+	public DynamoBolt() {
+		super("python", "price_bolt.py");
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("word"));
+	}
+
+	@Override
+	public Map<String, Object> getComponentConfiguration() {
+		return null;
+	}
+}
 
 public static void main(String[] args) throws Exception {
 
 	TopologyBuilder builder = new TopologyBuilder();
 
-	builder.setSpout("twitter_spout", new TwitterSpout(), 5);
-	builder.setSpout("reddit_spout", new RedditSpout(), 5);
-	builder.setSpout("news_spout", new NewsSpout(), 5);
-	builder.setSpout("price_spout", new PriceSpout(), 5);
+	builder.setSpout("twitter_spout", new TwitterSpout(), 4);
+	builder.setSpout("reddit_spout", new RedditSpout(), 2);
+	builder.setSpout("news_spout", new NewsSpout(), 2);
+	builder.setSpout("price_spout", new PriceSpout(), 2);
 
-	builder.setBolt("analysis_bolt", new DynamoBolt(), 20).shuffleGrouping("twitter_spout").shuffleGrouping("news_spout").shuffleGrouping("reddit_spout").shuffleGrouping("price_spout");
+	builder.setBolt("analysis_bolt", new DynamoBolt(), 4).shuffleGrouping("twitter_spout").shuffleGrouping("news_spout").shuffleGrouping("reddit_spout").shuffleGrouping("price_spout");
+	builder.setBolt("price_bolt", new PriceBolt(), 2).shuffleGrouping("price_spout");
 
 	Config conf = new Config();
 	conf.setDebug(true);
 
 	if (args != null && args.length > 0) {
-		conf.setNumWorkers(5);
+		conf.setNumWorkers(4);
 		StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 	}
 	else {
-		conf.setMaxTaskParallelism(3);
+		conf.setMaxTaskParallelism(4);
 
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("mytopology", conf, builder.createTopology());

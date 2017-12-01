@@ -34,22 +34,22 @@ class RedditInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
+        print data
     	data = json.loads(json.loads(data))
+        print data
 
         # Get today's date
         today = date.today()
 
         # Store analyzed results in DynamoDB
         table = dynamodb.Table("reddit_sentiment")
+        
+        sentiment = get_sentiment_score(data['rank'], data['comments'])
 		
-        for sub in data:
-          sentiment = get_sentiment_score(sub['rank'], sub['comments'])
-		
-          table.put_item(
+        table.put_item(
             Item = {
-                'date': str(today),
-                'timestamp': str(data['timestamp_ms']),
-                'text': data['text'],
+                'date': str(today),               
+                'title': data['title'],
                 'sentiment': Decimal(sentiment)
             }
           )

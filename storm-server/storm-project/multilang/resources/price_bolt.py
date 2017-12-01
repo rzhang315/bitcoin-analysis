@@ -24,17 +24,17 @@ dynamodb = boto3.resource('dynamodb',
 class PriceInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple ex:{'timestamp': u'2017-12-01T17:24:00+00:00', 'price': u'10,529.7513'}
-        data = tup.values[0]
-
+        data = tup.values		
     	data = json.loads(json.loads(data))  
-
+        print data
+		
         # Store analyzed results in DynamoDB
         table = dynamodb.Table("bitcoin_price")
         table.put_item(
             Item = data
         )
         # Emit for downstream bolts
-        storm.emit([data])
+        storm.emit(data)
 
 PriceInsertBolt().run()
 

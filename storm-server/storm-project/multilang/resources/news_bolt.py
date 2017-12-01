@@ -38,7 +38,9 @@ class NewsInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
+        print data
     	data = json.loads(json.loads(data))
+        print data
 
         # Get today's date
         today = date.today()
@@ -48,11 +50,12 @@ class NewsInsertBolt(storm.BasicBolt):
 
         # Store analyzed results in DynamoDB
         table = dynamodb.Table("news_sentiment")
+        
         table.put_item(
             Item = {
                 'date': str(today),
                 'timestamp': str(data['publishedAt']),
-                'text': data['title'],
+                'title': data['title'],
                 'sentiment': Decimal(sentiment)
             }
         )

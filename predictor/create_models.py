@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from pandas import read_csv
 import math
 from keras.models import Sequential
@@ -9,15 +8,33 @@ from keras.layers import Dense, LSTM, Dropout, Flatten, Activation
 Create models to predict bitcoin prices.
 """
 
-
 def generate_models(look_back, future_offset):
 
-    # Split into train and test set
     def split_data(dataframe, look_back, future_offset):
-        def normalize_window(window):
-            return [((float(p) / float(window[0])) - 1) for p in window]
+        """
+        Split data into training and testing sets
+
+        Args:
+            dataframe : pandas table for bitcoin prices
+            look_back : number of consecutive points to use in prediction
+            future_offset : how many points into the future to predict
+
+        Returns:
+            tuple of (train_x, train_y, test_x, test_y, num_features)
+
+        """
         # Convert into dataset
         def create_dataset(dataset, output_feature):
+            """
+            Helper function to create dataset by combining the adjacent datapoints into a feature set.
+
+            Args:
+                dataset : numpy array of features
+                output_feature : feature to predict into the future
+
+            Returns:
+                tuple of (data_x, data_y) numpy arrays
+            """
             dataX, dataY = [], []
             for i in range(len(dataset) - look_back - 1 - future_offset):
                 a = dataset[i:(i + look_back)].flatten()
@@ -48,35 +65,33 @@ def generate_models(look_back, future_offset):
             output_feature=0
         )
 
-        # TOOD: LSTM
-        #train_x = np.reshape(train_x, (train_x.shape[0], train_x.shape[1], 1))
-        #test_x = np.reshape(test_x, (test_x.shape[0], test_x.shape[1], 1))
-
         return train_x, train_y, test_x, test_y, num_features
 
     def create_and_train_model(train_x, train_y, test_x, test_y, num_features, look_back):
-        # Create and fit multilayer perceptron
+        """
+        Create and train multilayer perceptron model.
+
+        Args:
+            train_x : numpy array of input values for training set
+            train_y : numpy array of actualy y values for training set
+            test_x  : numpy array of input values for test set
+            test_y  : numpy array of actual y values to use in test validation
+            num_features  : number of features used in prediction
+            look_back : number of consecutive points to use in prediction
+
+        Returns:
+            model : keras model trained by the training data
+            train_score : MSE score of training set
+            test_score  : MSE score of test set
+        """
+
         model = Sequential()
-
         layers = [1, 50, 100, 1]
-
-        #model.add(LSTM(
-        #    input_dim=layers[0],
-        #    output_dim=layers[1],
-        #    return_sequences=True))
-        #model.add(Dropout(0.2))
-
-        #model.add(LSTM(
-        #    layers[2],
-        #    return_sequences=False))
-        #model.add(Dropout(0.2))
 
         model.add(Dense(128, input_dim=look_back * num_features, activation='relu'))
         model.add(Dense(64, activation='relu'))
         model.add(Dense(16, activation='relu'))
         model.add(Dense(1))
-        #model.add(Dense(output_dim=layers[3]))
-        #model.add(Activation("linear"))
 
         model.compile(loss='mean_squared_error', optimizer='adam')
         model.fit(train_x, train_y, epochs=300, batch_size=32, validation_split=0.10, verbose=2)

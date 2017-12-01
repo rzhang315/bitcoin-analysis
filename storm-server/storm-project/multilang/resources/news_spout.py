@@ -12,7 +12,7 @@ servers = config['kafka']['servers']
 topic = config['kafka']['topic']['news']
 kafka_consumer = KafkaConsumer(topic, bootstrap_servers=servers)
 
-class NewSpout(Spout):
+class NewsSpout(Spout):
 
     def nextTuple(self):
         # Consume next data from Kafka queue

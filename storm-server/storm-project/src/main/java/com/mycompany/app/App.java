@@ -31,6 +31,54 @@ public static class TwitterSpout extends ShellSpout implements IRichSpout {
 	}
 }
 
+public static class RedditSpout extends ShellSpout implements IRichSpout {
+	public RedditSpout() {
+		super("python", "reddit_spout.py");
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("word"));
+	}
+
+	@Override
+	public Map<String, Object> getComponentConfiguration() {
+		return null;
+	}
+}
+
+public static class PriceSpout extends ShellSpout implements IRichSpout {
+	public PriceSpout() {
+		super("python", "price_spout.py");
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("word"));
+	}
+
+	@Override
+	public Map<String, Object> getComponentConfiguration() {
+		return null;
+	}
+}
+
+public static class NewsSpout extends ShellSpout implements IRichSpout {
+	public NewsSpout() {
+		super("python", "news_spout.py");
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("word"));
+	}
+
+	@Override
+	public Map<String, Object> getComponentConfiguration() {
+		return null;
+	}
+}
+
 public static class DynamoBolt extends ShellBolt implements IRichBolt {
 	public DynamoBolt() {
 		super("python", "dynamo_bolt.py");
@@ -53,13 +101,17 @@ public static void main(String[] args) throws Exception {
 	TopologyBuilder builder = new TopologyBuilder();
 
 	builder.setSpout("twitter_spout", new TwitterSpout(), 5);
-	builder.setBolt("analysis_bolt", new DynamoBolt(), 8).shuffleGrouping("twitter_spout");
+	builder.setSpout("reddit_spout", new RedditSpout(), 5);
+	builder.setSpout("news_spout", new NewsSpout(), 5);
+	builder.setSpout("price_spout", new PriceSpout(), 5);
+
+	builder.setBolt("analysis_bolt", new DynamoBolt(), 20).shuffleGrouping("twitter_spout").shuffleGrouping("news_spout").shuffleGrouping("reddit_spout").shuffleGrouping("price_spout");
 
 	Config conf = new Config();
 	conf.setDebug(true);
 
 	if (args != null && args.length > 0) {
-		conf.setNumWorkers(3);
+		conf.setNumWorkers(5);
 		StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 	}
 	else {

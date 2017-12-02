@@ -15,3 +15,9 @@ target
 
 # Configuration file
 config.json
+
+# Mac files
+.DS_Store
+
+# VSCode
+.vscode

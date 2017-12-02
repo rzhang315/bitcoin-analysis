@@ -10,8 +10,9 @@ ECE 4813 cloud computing project for bitcoin price analysis and prediction.
     * DynamoDB
     * Kafka
 5. `make build` to build the Storm `*.jar` file to run.
-6. `make deploy` to deploy the build to Storm.
-7. `make listen` to start the listeners that will feed data into the Kafka queues.
+6. `make kill` to kill the deployment.
+7. `make deploy` to deploy the build to Storm (this also kills the deployment)
+8. `make listen` to start the listeners that will feed data into the Kafka queues.
 
 # View logs
 Logs are extremely useful when Storm does not work as expected. They can be found in the following directory:

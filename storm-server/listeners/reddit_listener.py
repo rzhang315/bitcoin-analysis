@@ -33,7 +33,7 @@ def main():
    
 	
     while True:	
-        for k, submission in enumerate(reddit.subreddit(keywords[0]).top(limit=20)):
+        for k, submission in enumerate(reddit.subreddit(keywords[0]).top(limit=30)):
             submission.comments.replace_more(limit=0)
             submission.comment_sort = 'top'
             submission_dict = {
@@ -42,7 +42,7 @@ def main():
                 'comments': [top_level_comment.body for top_level_comment in submission.comments][:20]}	
             kafka_producer.send(topic, json.dumps(submission_dict))
 
-        time.sleep(10)
+        time.sleep(60)
 
 if __name__ == '__main__':
     main()

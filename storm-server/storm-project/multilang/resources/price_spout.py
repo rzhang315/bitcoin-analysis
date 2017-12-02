@@ -16,7 +16,7 @@ class PriceSpout(Spout):
 
     def nextTuple(self):
         # Consume next data from Kafka queue
-    	data = kafka_consumer.next().value
+        data = kafka_consumer.next().value
 
         # Emit value so bolts down stream can process it
         emit([data])

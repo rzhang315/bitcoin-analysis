@@ -10,7 +10,9 @@
         "servers": ["MY_INTERNAL_IP:PORT"],
         "topic": {
             "twitter": "tweets",
-            "reddit": "posts"
+            "reddit": "reddits",                 
+			"news":"news",
+			"price":"prices"
         }
     },
     "dynamodb" : {
@@ -21,5 +23,14 @@
         "access_key": "MY_ACCESS_KEY",
         "secret_key": "MY_SECRET_KEY",
         "region": "us-east-1"
+    },
+    "news": {
+        "keywords": ["bitcoin"],
+		"key": "mykey"
+    },
+	"reddit": {
+        "client_id": "xxx",
+		"client_secret": "xxx",
+        "keywords": ["bitcoin"]		
     }
 }

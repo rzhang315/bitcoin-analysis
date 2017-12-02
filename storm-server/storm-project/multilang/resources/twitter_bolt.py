@@ -5,9 +5,9 @@ import boto3
 import json
 import storm
 import os
-from sentiment import compute_sentiment
 from kafka import KafkaConsumer
 from decimal import Decimal
+from textblob import TextBlob
 
 # Load config file
 with open('config.json') as json_data_file:
@@ -22,41 +22,30 @@ dynamodb = boto3.resource('dynamodb',
     aws_secret_access_key=secret_key,
     region_name=region)
 
-def analyzeData(data):
-    """
-    Analyze Twitter data.
-
-    Args:
-        data (dict) : Twitter data dictionary
-
-    Returns:
-        analyzed data
-    """
-    return compute_sentiment(data)
+def get_sentiment_score(text):
+    return TextBlob(text).sentiment.polarity
 
 class TwitterInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
-        #print data
     	data = json.loads(json.loads(data))
-        #print data
 
         # Get today's date
         today = date.today()
 
         # Analyze data
-        sentiment = analyzeData(data)
+        sentiment = get_sentiment_score(data['text'])
 
         # Store analyzed results in DynamoDB
-        table = dynamodb.Table("tweet_sentiment")
+        table = dynamodb.Table(config['dynamodb']['twitter'])
         table.put_item(
             Item = {
                 'date': str(today),
                 'timestamp': str(data['timestamp_ms']),
-                'hashtags': data['entities']['hashtags'],
+                'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
                 'text': data['text'],
-                'sentiment': Decimal(sentiment)
+                'sentiment': Decimal(str(sentiment))
             }
         )
         # Emit for downstream bolts

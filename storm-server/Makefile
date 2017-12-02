@@ -9,11 +9,11 @@ build:
 	cd storm-project && mvn clean package
 
 kill:
-	storm kill mytopology
+	storm kill mytopology -w 1
 
 deploy:
-	(storm kill mytopology || true) && \
-	sleep 15 && \
+	(storm kill mytopology -w 1 || true) && \
+	sleep 10 && \
         cd storm-project && \
         storm jar target/storm-project-0.9.3-jar-with-dependencies.jar com.mycompany.app.App mytopology
 

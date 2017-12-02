@@ -26,6 +26,7 @@ class PriceInsertBolt(storm.BasicBolt):
         # Load data from tuple ex:{'timestamp': u'2017-12-01T17:24:00+00:00', 'price': u'10,529.7513'}
         data = tup.values[0]
         data = json.loads(data)
+        data['price'] = Decimal(str(float(data['price'].replace(',', ''))))
 
         # Store analyzed results in DynamoDB
         table = dynamodb.Table(config['dynamodb']['price'])
@@ -33,7 +34,7 @@ class PriceInsertBolt(storm.BasicBolt):
             Item = data
         )
         # Emit for downstream bolts
-        storm.emit(data)
+        storm.emit([{'source': 'price', 'data': data}])
 
 PriceInsertBolt().run()
 

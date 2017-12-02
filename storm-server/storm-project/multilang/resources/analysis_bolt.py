@@ -21,45 +21,41 @@ dynamodb = boto3.resource('dynamodb',
     aws_secret_access_key=secret_key,
     region_name=region)
 
-def analyzeData(data):
-    """
-    Analyze Twitter data.
-
-    Args:
-        data (dict) : Twitter data dictionary
-
-    Returns:
-        analyzed data
-    """
-    return 0
+overall_sentiment = [0.0]
 
 class DynamoInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
-        '''
-    	data = json.loads(json.loads(data))
 
+        # Analyze data
+        if data['source'] == 'twitter':
+            weight = .995
+            sentiment = data['data']['sentiment']
+            overall_sentiment[0] = overall_sentiment[0] * weight + sentiment * (1 - weight)
+        elif data['source'] == 'reddit':
+            weight = .85
+            sentiment = data['data']['sentiment']
+            overall_sentiment[0] = overall_sentiment[0] * weight + sentiment * (1 - weight)
+        elif data['source'] == 'news':
+            weight = .85
+            sentiment = data['data']['sentiment']
+            overall_sentiment[0] = overall_sentiment[0] * weight + sentiment * (1 - weight)
+ 
         # Get today's date
         today = date.today()
 
-        # Analyze data
-        sentiment = analyzeData(data)
-
         # Store analyzed results in DynamoDB
-        table = dynamodb.Table(config['dynamodb']['twitter'])
+        table = dynamodb.Table(config['dynamodb']['analysis'])
         table.put_item(
             Item = {
                 'date': str(today),
-                'timestamp': str(data['timestamp_ms']),
-                'hashtags': data['entities']['hashtags'],
-                'text': data['text'],
-                'sentiment': Decimal(sentiment)
+                'timestamp': str(time.time()),
+                'sentiment': Decimal(str(overall_sentiment[0]))
             }
         )
         # Emit for downstream bolts
         storm.emit([data])
-        '''
 
 DynamoInsertBolt().run()
 

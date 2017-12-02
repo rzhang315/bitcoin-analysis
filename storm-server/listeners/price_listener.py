@@ -23,25 +23,21 @@ def main():
     topic = config['kafka']['topic']['price']
     kafka_producer = KafkaProducer(bootstrap_servers=servers)
 
-    url = "https://api.coindesk.com/v1/bpi/currentprice.json"
+    url = 'https://api.coindesk.com/v1/bpi/currentprice.json'
 	
     while True:
 	
         resp = requests.get(url)
-        #print resp
         price = resp.json()['bpi']['USD']['rate']	
         timestamp = resp.json()['time']['updatedISO']	
  
-        data = {}
-        data['price'] = price 
-        data['timestamp'] = timestamp        
+        data = {
+	    'price': price,
+	    'timestamp': timestamp
+        }
             			
         kafka_producer.send(topic, json.dumps(data))
-
-        #print data
-		
         time.sleep(10)
-    
 
 if __name__ == '__main__':
     main()

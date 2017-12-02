@@ -42,18 +42,17 @@ class RedditInsertBolt(storm.BasicBolt):
         table = dynamodb.Table(config['dynamodb']['reddit'])
         
         sentiment = get_sentiment_score(data['title'], data['comments'], data['rank'])
-		
-        table.put_item(
-            Item = {
-                'date': str(today),
-                'sentiment': Decimal(str(sentiment)),
-                'rank': data['rank'],
-                'title': data['title'],
-                'comments': data['comments']
-            }
-          )
+        parsed_data = {
+            'date': str(today),
+            'sentiment': Decimal(str(sentiment)),
+            'rank': data['rank'],
+            'title': data['title'],
+            'comments': data['comments']
+        }
+        table.put_item(Item=parsed_data)
+
         # Emit for downstream bolts
-        storm.emit([data])
+        storm.emit([{'source': 'reddit', 'data': parsed_data}])
 
 RedditInsertBolt().run()
 

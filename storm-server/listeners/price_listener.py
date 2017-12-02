@@ -37,7 +37,7 @@ def main():
         }
             			
         kafka_producer.send(topic, json.dumps(data))
-        time.sleep(10)
+        time.sleep(60)
 
 if __name__ == '__main__':
     main()

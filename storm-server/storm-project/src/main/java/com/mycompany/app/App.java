@@ -81,8 +81,7 @@ public static class NewsSpout extends ShellSpout implements IRichSpout {
 
 public static class AnalysisBolt extends ShellBolt implements IRichBolt {
 	public AnalysisBolt() {
-		super("python", "dynamo_bolt.py"); 
-		//to be changed later
+		super("python", "analysis_bolt.py"); 
 	}
 
 	@Override
@@ -95,6 +94,23 @@ public static class AnalysisBolt extends ShellBolt implements IRichBolt {
 		return null;
 	}
 }
+
+public static class PredictorBolt extends ShellBolt implements IRichBolt {
+	public PredictorBolt() {
+		super("python", "predictor_bolt.py"); 
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("word"));
+	}
+
+	@Override
+	public Map<String, Object> getComponentConfiguration() {
+		return null;
+	}
+}
+
 
 public static class TwitterBolt extends ShellBolt implements IRichBolt {
 	public TwitterBolt() {
@@ -174,6 +190,7 @@ public static void main(String[] args) throws Exception {
 	builder.setBolt("reddit_bolt", new RedditBolt(), 2).shuffleGrouping("reddit_spout");
 	builder.setBolt("news_bolt", new NewsBolt(), 2).shuffleGrouping("news_spout");
 	builder.setBolt("price_bolt", new PriceBolt(), 2).shuffleGrouping("price_spout");	
+	builder.setBolt("predictor_bolt", new PredictorBolt(), 2).shuffleGrouping("price_spout");	
 	
 	builder.setBolt("analysis_bolt", new AnalysisBolt(), 2).shuffleGrouping("twitter_bolt").shuffleGrouping("news_bolt").shuffleGrouping("reddit_bolt").shuffleGrouping("price_bolt");
 

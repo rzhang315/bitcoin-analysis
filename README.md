@@ -5,13 +5,24 @@ ECE 4813 cloud computing project for bitcoin price analysis and prediction.
 1. Clone this repository to a machine with Storm server already installed and running.
 2. `cd storm-server` to switch to the storm-server directory.
 3. `make init` to install the necessary python libraries and create a `config.json`.
-4. Fill in the `config.json` with appropriate data. This contains configuration information for the following:
-    * Twitter
-    * DynamoDB
-    * Kafka
-5. `make build` to build the Storm `*.jar` file to run.
-6. `make kill` to kill the deployment.
-7. `make deploy` to deploy the build to Storm (this also kills the deployment)
+4. Create the following tables in DynamoDB:
+
+    | Table Name                | Partition Key         | Sort Key              |
+    | -----------------         |:---------------------:|:---------------------:|
+    | bitcoin_analysis          | date (String)         | timestamp (String)    |
+    | bitcoin_price             | timestamp (String)    |                       |
+    | bitcoin_price_prediction  | timestamp (String)    |                       |
+    | tweet_sentiment           | date (String)         | timestamp (String)    |
+    | news_sentiment            | date (String)         | timestamp (String)    |
+    | reddit_sentiment          | date (String)         | title (String)        |
+5. Fill in the `config.json` with appropriate data. This contains configuration information for the following:
+    * Twitter API Keys
+    * AWS DynamoDB Access Keys
+    * Kafka Queue Names
+    * Reddit API Keys
+    * Google News API Key
+6. `make build` to build the Storm `*.jar` file to run.
+7. `make deploy` to deploy the build to Storm (this will automatically kill an existing deployment before deploying a new one)
 8. `make listen` to start the listeners that will feed data into the Kafka queues.
 
 # View logs

@@ -35,7 +35,7 @@ def main():
         output = resp.json()['articles']		
         output = sorted(output, key=itemgetter('publishedAt'), reverse=True)		
         
-        for article in output[0:10]:
+        for article in output:
             data = {
                 'source': article['source'],
                 'author': article['author'],
@@ -45,7 +45,7 @@ def main():
             }
             kafka_producer.send(topic, json.dumps(data))
 
-        time.sleep(10)
+        time.sleep(60)
 
 if __name__ == '__main__':
     main()

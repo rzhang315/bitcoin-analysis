@@ -5,7 +5,6 @@ import boto3
 import json
 import storm
 import os
-from sentiment import compute_sentiment
 from kafka import KafkaConsumer
 from decimal import Decimal
 
@@ -32,12 +31,13 @@ def analyzeData(data):
     Returns:
         analyzed data
     """
-    return compute_sentiment(data)
+    return 0
 
 class DynamoInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
+        '''
     	data = json.loads(json.loads(data))
 
         # Get today's date
@@ -59,6 +59,7 @@ class DynamoInsertBolt(storm.BasicBolt):
         )
         # Emit for downstream bolts
         storm.emit([data])
+        '''
 
 DynamoInsertBolt().run()
 

@@ -10,9 +10,9 @@
         "servers": ["MY_INTERNAL_IP:PORT"],
         "topic": {
             "twitter": "tweets",
-            "reddit": "reddits",                 
-			"news":"news",
-			"price":"prices"
+            "reddit": "reddits",
+            "news":"news",
+            "price":"prices"
         }
     },
     "dynamodb" : {
@@ -26,11 +26,11 @@
     },
     "news": {
         "keywords": ["bitcoin"],
-		"key": "mykey"
+        "key": "mykey"
     },
-	"reddit": {
+    "reddit": {
         "client_id": "xxx",
-		"client_secret": "xxx",
-        "keywords": ["bitcoin"]		
+        "client_secret": "xxx",
+        "keywords": ["bitcoin"]
     }
 }

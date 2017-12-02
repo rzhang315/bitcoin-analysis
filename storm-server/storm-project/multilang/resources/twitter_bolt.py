@@ -39,17 +39,17 @@ class TwitterInsertBolt(storm.BasicBolt):
 
         # Store analyzed results in DynamoDB
         table = dynamodb.Table(config['dynamodb']['twitter'])
-        table.put_item(
-            Item = {
-                'date': str(today),
-                'timestamp': str(data['timestamp_ms']),
-                'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
-                'text': data['text'],
-                'sentiment': Decimal(str(sentiment))
-            }
-        )
+        parsed_data = {
+            'date': str(today),
+            'timestamp': str(data['timestamp_ms']),
+            'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
+            'text': data['text'],
+            'sentiment': Decimal(str(sentiment))
+        }
+        table.put_item(Item=parsed_data)
+
         # Emit for downstream bolts
-        storm.emit([data])
+        storm.emit([{'source': 'twitter', 'data': parsed_data}])
 
 TwitterInsertBolt().run()
 

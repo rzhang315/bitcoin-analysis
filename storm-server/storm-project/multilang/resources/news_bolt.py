@@ -39,18 +39,17 @@ class NewsInsertBolt(storm.BasicBolt):
 
         # Store analyzed results in DynamoDB
         table = dynamodb.Table(config['dynamodb']['news'])
+        parsed_data = {
+            'date': str(today),
+            'timestamp': str(data['publishedAt']),
+            'title': data['title'],
+            'description': data['description'] if data['description'] != '' else ' ',
+            'sentiment': Decimal(str(sentiment))
+        }
+        table.put_item(Item=parsed_data)
 
-        table.put_item(
-            Item = {
-                'date': str(today),
-                'timestamp': str(data['publishedAt']),
-                'title': data['title'],
-                'description': data['description'],
-                'sentiment': Decimal(sentiment)
-            }
-        )
         # Emit for downstream bolts
-        storm.emit([data])
+        storm.emit([{'source': 'news', 'data': parsed_data}])
 
 NewsInsertBolt().run()
 

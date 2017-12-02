@@ -2,6 +2,9 @@
 *.pyc
 log
 
+# Virtualenv
+venv
+
 # Eclipse files
 .project
 .classpath

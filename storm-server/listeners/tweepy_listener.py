@@ -33,6 +33,7 @@ class KafkaListener(StreamListener):
         Args:
             data (dict) : dictionary item to publish
         """
+        # print "tw_list", data, json.dumps(data) 
         self.kafka_producer.send(self.topic, json.dumps(data))
         return True
 

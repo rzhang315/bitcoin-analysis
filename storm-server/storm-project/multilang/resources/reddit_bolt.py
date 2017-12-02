@@ -5,7 +5,6 @@ import boto3
 import json
 import storm
 import os
-from sentiment import compute_sentiment
 from kafka import KafkaConsumer
 from decimal import Decimal
 from textblob import TextBlob
@@ -23,34 +22,34 @@ dynamodb = boto3.resource('dynamodb',
     aws_secret_access_key=secret_key,
     region_name=region)
 
-def _get_sentiment_score(title, comments):
+def get_sentiment_score(title, comments, rank):
     
     sentiment_score = 0
     sentiment_score += TextBlob(title).sentiment.polarity
     sentiment_score += sum(TextBlob(c).sentiment.polarity for c in comments)
-    return sentiment_score	
+    return sentiment_score * (.95 ** (rank - 1))
 
 class RedditInsertBolt(storm.BasicBolt):
     def process(self, tup):
         # Load data from tuple
         data = tup.values[0]
-        #print data
-    	data = json.loads(json.loads(data))
-        #print data
+    	data = json.loads(data)
 
         # Get today's date
         today = date.today()
 
         # Store analyzed results in DynamoDB
-        table = dynamodb.Table("reddit_sentiment")
+        table = dynamodb.Table(config['dynamodb']['reddit'])
         
-        sentiment = get_sentiment_score(data['rank'], data['comments'])
+        sentiment = get_sentiment_score(data['title'], data['comments'], data['rank'])
 		
         table.put_item(
             Item = {
-                'date': str(today),               
+                'date': str(today),
+                'sentiment': Decimal(str(sentiment)),
+                'rank': data['rank'],
                 'title': data['title'],
-                'sentiment': Decimal(sentiment)
+                'comments': data['comments']
             }
           )
         # Emit for downstream bolts

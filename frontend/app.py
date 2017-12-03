@@ -7,15 +7,10 @@ import pandas as pd
 import requests
 import json
 import boto3
+import datetime
 from boto3.dynamodb.conditions import Key, Attr
 
 app = dash.Dash()
-
-df = pd.read_csv(
-    'https://gist.githubusercontent.com/chriddyp/' +
-    '5d1ea79569ed194d432e56108a04d188/raw/' +
-    'a9f9e8076b837d541398e999dcbac2b2826a81f8/'+
-    'gdp-life-exp-2007.csv')
 
 # Load config file
 with open('config.json') as json_data_file:
@@ -30,7 +25,6 @@ dynamodb = boto3.resource('dynamodb',
     aws_secret_access_key=secret_key,
     region_name=region)
 
-# connect the 
 
 
 tweet_sentiment = dynamodb.Table('tweet_sentiment')
@@ -50,7 +44,7 @@ app.layout = html.Div([
     dcc.Graph(id='live-update-sentiment-scatter'), 
     dcc.Interval(
             id='interval-component',
-            interval=1*60000 # in milliseconds 60 secs in this app
+            interval=1*5000 # in milliseconds 60 secs in this app
     )
 ])
 
@@ -58,37 +52,149 @@ app.layout = html.Div([
 @app.callback(Output('live-update-sentiment-scatter', 'figure'),
               events=[Event('interval-component', 'interval')])
 def update_sentiment_scatter():
-    # def _get_bitcoin_data():
-    #     resp = requests.get('http://127.0.0.1:5000')
-    #     json_list = json.loads(resp.text)
-    #     x = [data['time_stamp'] for data in json_list]
-    #     y = [data['price'] for data in json_list]
-    #     print(x)
-    #     print(y)
-    #     return x, y
-    df = pd.read_csv(
-    'https://gist.githubusercontent.com/chriddyp/' +
-    '5d1ea79569ed194d432e56108a04d188/raw/' +
-    'a9f9e8076b837d541398e999dcbac2b2826a81f8/'+
-    'gdp-life-exp-2007.csv')
+
+    def _get_bitcoin_analysis_data():
+        response = bitcoin_analysis.scan(
+            Key('date')
+        )
+        items = response['Items']
+            # 'date': str(today),
+            # 'timestamp': str(data['timestamp_ms']),
+            # 'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
+            # 'text': data['text'],
+            # 'sentiment': Decimal(str(sentiment))
+        date = []
+        timestamp = []
+        sentiment = []
+        text = []
+        for item in items:
+            t = datetime.datetime.fromtimestamp(round(float(item["timestamp"])))
+            date.append(t)
+            sentiment.append(float(item["sentiment"]))
+            text.append(item["date"])
+        # might sorted with dynamo db api
+        return [list(x) for x in zip(*sorted(zip(date, sentiment, text), key=lambda pair: pair[0]))]
+
+
+    def _get_tweet_sentiment_data():
+        response = tweet_sentiment.scan(
+            Key('date')
+        )
+        items = response['Items']
+            # 'date': str(today),
+            # 'timestamp': str(data['timestamp_ms']),
+            # 'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
+            # 'text': data['text'],
+            # 'sentiment': Decimal(str(sentiment))
+        date = []
+        timestamp = []
+        hashtags = []
+        text = []
+        sentiment = []
+        for item in items:
+            t = datetime.datetime.fromtimestamp(int(item["timestamp"]) / 1e3)
+            date.append(t)
+            sentiment.append(float(item["sentiment"]))
+            text.append(item["text"])
+        # might sorted with dynamo db api
+        return [list(x) for x in zip(*sorted(zip(date, sentiment, text), key=lambda pair: pair[0]))]
+    def _get_news_sentiment_data():
+        response = news_sentiment.scan(
+            Key('date')
+        )
+        items = response['Items']
+            # 'date': str(today),
+            # 'timestamp': str(data['publishedAt']),
+            # 'title': data['title'],
+            # 'description': data['description'] if data['description'] != '' else ' ',
+            # 'sentiment': Decimal(str(sentiment))
+        date = []
+        timestamp = []
+        title = []
+        description = []
+        sentiment = []
+        for item in items:
+            date.append(item["timestamp"])
+            sentiment.append(float(item["sentiment"]))
+            title.append(item["title"])
+        # might sorted with dynamo db api
+        return [list(x) for x in zip(*sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
+
+    def _get_reddit_sentiment_data():
+        response = reddit_sentiment.scan(
+            Key('date')
+        )
+        items = response['Items']
+            # 'date': str(today),
+            # 'sentiment': Decimal(str(sentiment)),
+            # 'rank': data['rank'],
+            # 'title': data['title'],
+            # 'comments': data['comments']
+        date = []
+        sentiment = []
+        rank = []
+        title = []
+        comments = []
+        for item in items:
+            date.append(item["date"])
+            sentiment.append(float(item["sentiment"]))
+            title.append(item["title"])
+        # might sorted with dynamo db api
+        return [list(x) for x in zip(*sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
+
+    tweet_date, tweet_sentiment_score, tweet_text = _get_tweet_sentiment_data()
+    news_date, news_sentiment_score, news_text = _get_news_sentiment_data()
+    reddit_date, reddit_sentiment_score, reddit_text = _get_reddit_sentiment_data()
+    bitcoin_date, bitcoin_sentiment_score, bitcoin_text = _get_bitcoin_analysis_data()
+    
+    name_data = [
+                    'tweet', 
+                    'news', 
+                    'reddit', 
+                    'bitcoin',
+                 ]
+
+    sentiment_data = [
+                        tweet_sentiment_score, 
+                        news_sentiment_score, 
+                        reddit_sentiment_score, 
+                        bitcoin_sentiment_score,
+                     ]
+
+    date_data = [
+                    tweet_date,
+                    news_date, 
+                    reddit_date, 
+                    bitcoin_date,
+                 ]
+
+    text_data = [
+                    tweet_text,
+                    news_text,
+                    reddit_text,
+                    bitcoin_text
+                ]
+
     figure={
         'data': [
             go.Scatter(
-                x=df[df['continent'] == i]['gdp per capita'],
-                y=df[df['continent'] == i]['life expectancy'],
-                text=df[df['continent'] == i]['country'],
+
+                x=date_data[i],
+                y=sentiment_data[i],
+                text=text_data[i],
+                name=name_data[i],
+
                 mode='markers',
                 opacity=0.7,
                 marker={
                     'size': 15,
                     'line': {'width': 0.5, 'color': 'white'}
                 },
-                name=i
-            ) for i in df.continent.unique()
+            ) for i in range(len(date_data))
         ],
         'layout': go.Layout(
-            xaxis={'type': 'log', 'title': 'GDP Per Capita'},
-            yaxis={'title': 'Life Expectancy'},
+            xaxis={'title': 'time'},
+            yaxis={'title': 'sentiment scode (-1,1)'},
             margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             legend={'x': 0, 'y': 1},
             hovermode='closest'
@@ -137,7 +243,7 @@ def update_graph_scatter():
     predict_time, predict_price= _get_bitcoin_prediction_data()
     time = [real_time, predict_time]
     price = [real_price, predict_price]
-    xtitle = 'time:' + str(real_time[-1]) c+ ', price:' + str(real_price[-1])
+    xtitle = 'time:' + str(real_time[-1]) + ', price:' + str(real_price[-1])
     for t in range(2):
         traces.append(go.Scatter(
             x=time[t],
@@ -169,4 +275,4 @@ def update_graph_scatter():
 
 
 if __name__ == '__main__':
-    app.run_server(host='127.0.0.1',port=80,debug=True)
+    app.run_server(host='0.0.0.0',port=80)

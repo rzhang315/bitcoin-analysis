@@ -67,7 +67,8 @@ def update_sentiment_scatter():
 
     def _get_bitcoin_analysis_data():
         response = bitcoin_analysis.scan(
-            Key('date')
+            Key('date'),
+            Limit = SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -98,7 +99,8 @@ def update_sentiment_scatter():
 
     def _get_tweet_sentiment_data():
         response = tweet_sentiment.scan(
-            Key('date')
+            Key('date'),
+            Limit = SCAN_LIMIT,
         )
         items = response['Items']
         # 'date': str(today),
@@ -127,7 +129,8 @@ def update_sentiment_scatter():
 
     def _get_news_sentiment_data():
         response = news_sentiment.scan(
-            Key('date')
+            Key('date'),
+            Limit = SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -158,7 +161,8 @@ def update_sentiment_scatter():
 
     def _get_reddit_sentiment_data():
         response = reddit_sentiment.scan(
-            Key('date')
+            Key('date'),
+            Limit = SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -185,9 +189,8 @@ def update_sentiment_scatter():
         sentiment =  [number/la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
-
+    SCAN_LIMIT = 30
     LIMIT = 20
-
     tweet_date, tweet_sentiment_score, tweet_text = _get_tweet_sentiment_data()
     news_date, news_sentiment_score, news_text = _get_news_sentiment_data()
     reddit_date, reddit_sentiment_score, reddit_text = _get_reddit_sentiment_data()

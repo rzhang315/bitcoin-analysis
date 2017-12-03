@@ -194,7 +194,7 @@ def update_sentiment_scatter():
         ],
         'layout': go.Layout(
             xaxis={'title': 'time'},
-            yaxis={'title': 'sentiment scode (-1,1)'},
+            yaxis={'title': 'sentiment score (-1,1)'},
             margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             legend={'x': 0, 'y': 1},
             hovermode='closest'

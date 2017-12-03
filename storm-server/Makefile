@@ -20,3 +20,6 @@ deploy:
 
 listen:
 	cd listeners && python listeners.py
+
+web:
+	cd ../frontend && sudo python app.py

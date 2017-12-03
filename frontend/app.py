@@ -61,28 +61,6 @@ app.layout = html.Div([
 ])
 
 
-tweet_sentiment = dynamodb.Table('tweet_sentiment')
-news_sentiment = dynamodb.Table('news_sentiment')
-reddit_sentiment = dynamodb.Table('reddit_sentiment')
-
-bitcoin_analysis = dynamodb.Table('bitcoin_analysis')
-bitcoin_price = dynamodb.Table('bitcoin_price')
-bitcoin_price_prediction = dynamodb.Table('bitcoin_price_prediction')
-
-
-
-
-app.layout = html.Div([ 
-    html.Div('Bitcoin Analysis', style={'color': 'black', 'fontSize': 30}),
-    dcc.Graph(id='live-update-graph-scatter'),   
-    dcc.Graph(id='live-update-sentiment-scatter'), 
-    dcc.Interval(
-            id='interval-component',
-            interval=1*5000 # in milliseconds 60 secs in this app
-    )
-])
-
-
 @app.callback(Output('live-update-sentiment-scatter', 'figure'),
               events=[Event('interval-component', 'interval')])
 def update_sentiment_scatter():

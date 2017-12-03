@@ -3,11 +3,13 @@ import dash_core_components as dcc
 from dash.dependencies import Output, Event
 import dash_html_components as html
 import plotly.graph_objs as go
+
 import json
 import boto3
 import datetime
 from boto3.dynamodb.conditions import Key, Attr
 import scipy.linalg as la
+
 
 app = dash.Dash()
 
@@ -59,6 +61,27 @@ app.layout = html.Div([
 ])
 
 
+tweet_sentiment = dynamodb.Table('tweet_sentiment')
+news_sentiment = dynamodb.Table('news_sentiment')
+reddit_sentiment = dynamodb.Table('reddit_sentiment')
+
+bitcoin_analysis = dynamodb.Table('bitcoin_analysis')
+bitcoin_price = dynamodb.Table('bitcoin_price')
+bitcoin_price_prediction = dynamodb.Table('bitcoin_price_prediction')
+
+
+
+
+app.layout = html.Div([ 
+    html.Div('Bitcoin Analysis', style={'color': 'black', 'fontSize': 30}),
+    dcc.Graph(id='live-update-graph-scatter'),   
+    dcc.Graph(id='live-update-sentiment-scatter'), 
+    dcc.Interval(
+            id='interval-component',
+            interval=1*5000 # in milliseconds 60 secs in this app
+    )
+])
+
 
 @app.callback(Output('live-update-sentiment-scatter', 'figure'),
               events=[Event('interval-component', 'interval')])
@@ -69,6 +92,7 @@ def update_sentiment_scatter():
             Key('date')
         )
         items = response['Items']
+
         # 'date': str(today),
         # 'timestamp': str(data['timestamp_ms']),
         # 'hashtags': [ht['text'] for ht in data['entities']['hashtags']],
@@ -78,6 +102,7 @@ def update_sentiment_scatter():
         timestamp = []
         sentiment = []
         text = []
+
         for i, item in enumerate(items):
             if i > LIMIT:
                 break
@@ -91,9 +116,11 @@ def update_sentiment_scatter():
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, text), key=lambda pair: pair[0]))]
 
+
+
     def _get_tweet_sentiment_data():
         response = tweet_sentiment.scan(
-            Key('date'),
+            Key('date')
         )
         items = response['Items']
         # 'date': str(today),
@@ -106,6 +133,7 @@ def update_sentiment_scatter():
         hashtags = []
         text = []
         sentiment = []
+
         for i, item in enumerate(items):
             if i > LIMIT:
                 break
@@ -124,11 +152,13 @@ def update_sentiment_scatter():
             Key('date')
         )
         items = response['Items']
+
         # 'date': str(today),
         # 'timestamp': str(data['publishedAt']),
         # 'title': data['title'],
         # 'description': data['description'] if data['description'] != '' else ' ',
         # 'sentiment': Decimal(str(sentiment))
+
         date = []
         timestamp = []
         title = []
@@ -137,10 +167,12 @@ def update_sentiment_scatter():
         for i, item in enumerate(items):
             if i > LIMIT:
                 break
+
             date.append(item["timestamp"])
             sentiment.append(float(item["sentiment"]))
             title.append(item["title"])
         # might sorted with dynamo db api
+
 
         sentiment =  [number/la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
@@ -151,11 +183,13 @@ def update_sentiment_scatter():
             Key('date')
         )
         items = response['Items']
+
         # 'date': str(today),
         # 'sentiment': Decimal(str(sentiment)),
         # 'rank': data['rank'],
         # 'title': data['title'],
         # 'comments': data['comments']
+
         date = []
         sentiment = []
         rank = []
@@ -164,10 +198,12 @@ def update_sentiment_scatter():
         for i, item in enumerate(items):
             if i > LIMIT:
                 break
+
             date.append(item["date"])
             sentiment.append(float(item["sentiment"]))
             title.append(item["title"])
         # might sorted with dynamo db api
+
         sentiment =  [number/la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
@@ -207,7 +243,37 @@ def update_sentiment_scatter():
         bitcoin_text
     ]
 
-    figure = {
+    
+    name_data = [
+                    'tweet', 
+                    'news', 
+                    'reddit', 
+                    'bitcoin',
+                 ]
+
+    sentiment_data = [
+                        tweet_sentiment_score, 
+                        news_sentiment_score, 
+                        reddit_sentiment_score, 
+                        bitcoin_sentiment_score,
+                     ]
+
+    date_data = [
+                    tweet_date,
+                    news_date, 
+                    reddit_date, 
+                    bitcoin_date,
+                 ]
+
+    text_data = [
+                    tweet_text,
+                    news_text,
+                    reddit_text,
+                    bitcoin_text
+                ]
+
+    figure={
+
         'data': [
             go.Scatter(
 
@@ -226,7 +292,7 @@ def update_sentiment_scatter():
         ],
         'layout': go.Layout(
             xaxis={'title': 'time'},
-            yaxis={'title': 'sentiment scode (-1,1)'},
+            yaxis={'title': 'sentiment score (-1,1)'},
             margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             legend={'x': 0, 'y': 1},
             hovermode='closest'
@@ -306,4 +372,3 @@ def update_graph_scatter():
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0',port=80)
-

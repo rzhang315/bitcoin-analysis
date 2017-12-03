@@ -1,6 +1,9 @@
 # bitcoin-analysis
 ECE 4813 cloud computing project for bitcoin price analysis and prediction.
 
+![ScreenShot](https://github.com/boalinlai/bitcoin-analysis/blob/master/img/web_screenshot.png)
+
+
 # Quick Start Guide
 1. Clone this repository to a machine with Storm server already installed and running.
 2. `cd storm-server` to switch to the storm-server directory.

@@ -35,6 +35,12 @@ Logs are extremely useful when Storm does not work as expected. They can be foun
 
 # Run web server
 
-in /frondend/ folder 
-'sudo python app.py'
+in /frondend/ folder :
+
+`sudo python app.py`
+
 host and port can be tweaked.
+
+default is 0,0,0,0 with port 80
+
+

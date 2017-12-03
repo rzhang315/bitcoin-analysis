@@ -31,3 +31,10 @@ Logs are extremely useful when Storm does not work as expected. They can be foun
     /var/log/storm/workers-artifacts/{topology_name}/{worker_id}/worker.log
 
 `topology_name` and `worker_id` depends on the particular instance of the Storm server.
+
+
+# Run web server
+
+in /frondend/ folder 
+'sudo python app.py'
+host and port can be tweaked.

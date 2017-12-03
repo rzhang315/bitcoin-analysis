@@ -6,6 +6,7 @@ init:
 
 build:
 	cp config.json storm-project/multilang/resources/config.json
+	cp config.json ../frontend/config.json	
 	cd storm-project && mvn clean package
 
 kill:

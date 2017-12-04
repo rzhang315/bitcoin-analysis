@@ -28,7 +28,6 @@ ECE 4813 cloud computing project for bitcoin price analysis and prediction.
 7. `make deploy` to deploy the build to Storm (this will automatically kill an existing deployment before deploying a new one)
 8. `make listen` to start the listeners that will feed data into the Kafka queues.
 
-9. `make web` to start the web server. the default host is the public ip of ec2 instance
 
 # View logs
 Logs are extremely useful when Storm does not work as expected. They can be found in the following directory:
@@ -41,10 +40,11 @@ Logs are extremely useful when Storm does not work as expected. They can be foun
 
 in /frondend/ folder :
 
-`sudo python app.py`
+9. use `make web` to copy config file to current dir and start the web server. 
+the default host is the public ip of ec2 instance
 
 host and port can be tweaked.
 
-default is 0,0,0,0 with port 80
+default is "0,0,0,0" with port 80
 
 

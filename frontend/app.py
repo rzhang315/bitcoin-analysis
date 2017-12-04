@@ -55,7 +55,7 @@ app.layout = html.Div([
     dcc.Graph(id='live-update-sentiment-scatter'),
     dcc.Interval(
         id='interval-component',
-        interval=1 * 2000  # in milliseconds 2 secs in this app
+        interval= 30 * 1000  # in milliseconds 30 secs in this app
     ),
 
 ])

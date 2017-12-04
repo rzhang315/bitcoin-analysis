@@ -8,6 +8,7 @@ import json
 import os
 import datetime
 import time
+from operator import itemgetter
 
 def main():
 
@@ -27,32 +28,24 @@ def main():
     keywords = config['news']['keywords']
     key = config['news']['key']
 
-    url = "https://newsapi.org/v2/top-headlines?q="+keywords[0]+"&apiKey="+key
-	
+    url = 'https://newsapi.org/v2/top-headlines?q={kw}&apiKey={key}'.format(kw=keywords[0],key=key)
+
     while True:
-	
         resp = requests.get(url)
-        #print resp
         output = resp.json()['articles']		
- 
-        output = sorted(output, key=lambda k: (k['publishedAt']), reverse=True)		
-    	
-        #print output
+        output = sorted(output, key=itemgetter('publishedAt'), reverse=True)		
         
-        for article in output[0:10]:
-            data = {}
-            data['source'] = article['source'] 
-            data['author'] = article['author'] 
-            data['title'] = article['title'] 
-            data['description'] = article['description'] 
-            data['publishedAt'] = article['publishedAt'] 
-            			
+        for article in output:
+            data = {
+                'source': article['source'],
+                'author': article['author'],
+                'title': article['title'],
+                'description': article['description'],
+                'publishedAt': article['publishedAt'],
+            }
             kafka_producer.send(topic, json.dumps(data))
 
-        #print datas
-		
-        time.sleep(10)
-    
+        time.sleep(60)
 
 if __name__ == '__main__':
     main()

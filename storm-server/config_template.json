@@ -10,16 +10,31 @@
         "servers": ["MY_INTERNAL_IP:PORT"],
         "topic": {
             "twitter": "tweets",
-            "reddit": "posts"
+            "reddit": "reddits",
+            "news":"news",
+            "price":"prices"
         }
     },
     "dynamodb" : {
-        "twitter": "MY_TWITTER_DYNAMODB_TABLE NAME",
-        "reddit": "MY_REDDIT_DYNAMODB_TABLE NAME"
+        "twitter": "tweet_sentiment",
+        "reddit": "reddit_sentiment",
+        "news": "news_sentiment",
+        "price": "bitcoin_price",
+        "analysis": "bitcoin_analysis",
+        "prediction": "bitcoin_price_prediction"
     },
     "aws": {
         "access_key": "MY_ACCESS_KEY",
         "secret_key": "MY_SECRET_KEY",
         "region": "us-east-1"
+    },
+    "news": {
+        "keywords": ["bitcoin"],
+        "key": "MY_GOOGLE_NEWS_API_KEY"
+    },
+    "reddit": {
+        "client_id": "MY_REDDIT_CLIENT_ID",
+        "client_secret": "MY_REDDIT_CLIENT_SECRET",
+        "keywords": ["bitcoin"]
     }
 }

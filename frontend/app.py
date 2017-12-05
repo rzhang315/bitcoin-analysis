@@ -49,8 +49,7 @@ bitcoin_price_prediction = dynamodb.Table(
 
 
 app.layout = html.Div([
-
-    html.Div('Bitcoin Analysis', style={'color': 'black', 'fontSize': 30}),
+    html.Button('Bitcoin Analysis', id='refresh', type='submit',  style={'color': 'black', 'fontSize': 30}),
     dcc.Graph(id='live-update-graph-scatter'),
     dcc.Graph(id='live-update-sentiment-scatter'),
     dcc.Interval(
@@ -62,7 +61,7 @@ app.layout = html.Div([
 
 
 @app.callback(Output('live-update-sentiment-scatter', 'figure'),
-              events=[Event('interval-component', 'interval')])
+              events=[Event('interval-component', 'interval'), Event('refresh', 'click')])
 def update_sentiment_scatter():
 
     def _get_bitcoin_analysis_data():
@@ -283,7 +282,8 @@ def update_sentiment_scatter():
 
 
 @app.callback(Output('live-update-graph-scatter', 'figure'),
-              events=[Event('interval-component', 'interval')])
+              events=[Event('interval-component', 'interval'),
+              Event('refresh', 'click')])
 def update_graph_scatter():
 
     def _get_bitcoin_price_data():

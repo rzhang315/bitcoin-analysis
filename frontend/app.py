@@ -3,13 +3,15 @@ import dash_core_components as dcc
 from dash.dependencies import Output, Event
 import dash_html_components as html
 import plotly.graph_objs as go
-
 import json
 import boto3
 import datetime
+import time
 from boto3.dynamodb.conditions import Key, Attr
 import scipy.linalg as la
 
+
+THREE_DAYS = 259200
 
 app = dash.Dash()
 
@@ -49,26 +51,41 @@ bitcoin_price_prediction = dynamodb.Table(
 
 
 app.layout = html.Div([
-
-    html.Div('Bitcoin Analysis', style={'color': 'black', 'fontSize': 30}),
+    html.Button(
+        'Bitcoin Analysis',
+        id='refresh',
+        type='submit',
+        style={
+            'color': 'black',
+            'fontSize': 30}),
     dcc.Graph(id='live-update-graph-scatter'),
     dcc.Graph(id='live-update-sentiment-scatter'),
     dcc.Interval(
         id='interval-component',
-        interval=1 * 2000  # in milliseconds 2 secs in this app
+        interval=30 * 1000  # in milliseconds 30 secs in this app
     ),
 
 ])
 
 
-@app.callback(Output('live-update-sentiment-scatter', 'figure'),
-              events=[Event('interval-component', 'interval')])
+@app.callback(
+    Output(
+        'live-update-sentiment-scatter',
+        'figure'),
+    events=[
+        Event(
+            'interval-component',
+            'interval'),
+        Event(
+            'refresh',
+            'click')])
 def update_sentiment_scatter():
 
     def _get_bitcoin_analysis_data():
         response = bitcoin_analysis.scan(
-            Key('date'),
-            Limit = SCAN_LIMIT,
+            # Key('date'),
+            FilterExpression=Key('date').gt(timestampold),
+            Limit=SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -91,16 +108,14 @@ def update_sentiment_scatter():
             sentiment.append(float(item["sentiment"]))
             text.append(item["date"])
         # might sorted with dynamo db api
-        sentiment =  [number/la.norm(sentiment) for number in sentiment]
+        sentiment = [number / la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, text), key=lambda pair: pair[0]))]
 
-
-
     def _get_tweet_sentiment_data():
         response = tweet_sentiment.scan(
-            Key('date'),
-            Limit = SCAN_LIMIT,
+            FilterExpression=Key('date').gt(timestampold),
+            Limit=SCAN_LIMIT,
         )
         items = response['Items']
         # 'date': str(today),
@@ -123,14 +138,16 @@ def update_sentiment_scatter():
             text.append(item["text"])
         # might sorted with dynamo db api
 
-        sentiment =  [number/la.norm(sentiment) for number in sentiment]
+        sentiment = [number / la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, text), key=lambda pair: pair[0]))]
 
     def _get_news_sentiment_data():
         response = news_sentiment.scan(
-            Key('date'),
-            Limit = SCAN_LIMIT,
+            # Key('date'),
+            # FilterExpression=Key('date').gt(timestampold),
+            FilterExpression=Key('timestamp').gt(timestampold),
+            Limit=SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -154,15 +171,15 @@ def update_sentiment_scatter():
             title.append(item["title"])
         # might sorted with dynamo db api
 
-
-        sentiment =  [number/la.norm(sentiment) for number in sentiment]
+        sentiment = [number / la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
 
     def _get_reddit_sentiment_data():
         response = reddit_sentiment.scan(
-            Key('date'),
-            Limit = SCAN_LIMIT,
+            # Key('date'),
+            FilterExpression=Key('date').gt(timestampold),
+            Limit=SCAN_LIMIT,
         )
         items = response['Items']
 
@@ -186,11 +203,14 @@ def update_sentiment_scatter():
             title.append(item["title"])
         # might sorted with dynamo db api
 
-        sentiment =  [number/la.norm(sentiment) for number in sentiment]
+        sentiment = [number / la.norm(sentiment) for number in sentiment]
         return [list(x) for x in zip(
             *sorted(zip(date, sentiment, title), key=lambda pair: pair[0]))]
     SCAN_LIMIT = 30
     LIMIT = 20
+    ts = time.time()
+    timestampold = datetime.datetime.fromtimestamp(
+        ts - THREE_DAYS).strftime('%Y-%m-%d %H:%M:%S')
     tweet_date, tweet_sentiment_score, tweet_text = _get_tweet_sentiment_data()
     news_date, news_sentiment_score, news_text = _get_news_sentiment_data()
     reddit_date, reddit_sentiment_score, reddit_text = _get_reddit_sentiment_data()
@@ -224,36 +244,35 @@ def update_sentiment_scatter():
         bitcoin_text
     ]
 
-    
     name_data = [
-                    'tweet', 
-                    'news', 
-                    'reddit', 
-                    'bitcoin',
-                 ]
+        'tweet',
+        'news',
+        'reddit',
+        'bitcoin',
+    ]
 
     sentiment_data = [
-                        tweet_sentiment_score, 
-                        news_sentiment_score, 
-                        reddit_sentiment_score, 
-                        bitcoin_sentiment_score,
-                     ]
+        tweet_sentiment_score,
+        news_sentiment_score,
+        reddit_sentiment_score,
+        bitcoin_sentiment_score,
+    ]
 
     date_data = [
-                    tweet_date,
-                    news_date, 
-                    reddit_date, 
-                    bitcoin_date,
-                 ]
+        tweet_date,
+        news_date,
+        reddit_date,
+        bitcoin_date,
+    ]
 
     text_data = [
-                    tweet_text,
-                    news_text,
-                    reddit_text,
-                    bitcoin_text
-                ]
+        tweet_text,
+        news_text,
+        reddit_text,
+        bitcoin_text
+    ]
 
-    figure={
+    figure = {
 
         'data': [
             go.Scatter(
@@ -283,12 +302,14 @@ def update_sentiment_scatter():
 
 
 @app.callback(Output('live-update-graph-scatter', 'figure'),
-              events=[Event('interval-component', 'interval')])
+              events=[Event('interval-component', 'interval'),
+                      Event('refresh', 'click')])
 def update_graph_scatter():
 
     def _get_bitcoin_price_data():
         response = bitcoin_price.scan(
-            Key('timestamp')
+            FilterExpression=Key('timestamp').gt(timestampold)
+            # Key('timestamp')
         )
         items = response['Items']
         db_time = []
@@ -302,7 +323,8 @@ def update_graph_scatter():
 
     def _get_bitcoin_prediction_data():
         response = bitcoin_price_prediction.scan(
-            Key('timestamp')
+            # Key('timestamp')
+            FilterExpression=Key('timestamp').gt(timestampold)
         )
         items = response['Items']
         db_time = []
@@ -314,16 +336,21 @@ def update_graph_scatter():
         return [list(x) for x in zip(
             *sorted(zip(db_time, db_price), key=lambda pair: pair[0]))]
 
+    ts = time.time()
+    timestampold = datetime.datetime.fromtimestamp(
+        ts - THREE_DAYS).strftime('%Y-%m-%d %H:%M:%S')
+    TIME_STAMP = datetime.datetime.fromtimestamp(
+        ts).strftime('%Y-%m-%d %H:%M:%S')
     traces = list()
     name = ['real', 'predict']
     real_time, real_price = _get_bitcoin_price_data()
     predict_time, predict_price = _get_bitcoin_prediction_data()
-    time = [real_time, predict_time]
+    time_data = [real_time, predict_time]
     price = [real_price, predict_price]
     xtitle = 'time:' + str(real_time[-1]) + ', price:' + str(real_price[-1])
     for t in range(2):
         traces.append(go.Scatter(
-            x=time[t],
+            x=time_data[t],
             y=price[t],
             name=name[t],
             mode='lines+markers'
@@ -352,4 +379,4 @@ def update_graph_scatter():
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0',port=80)
+    app.run_server(host='0.0.0.0', port=80)

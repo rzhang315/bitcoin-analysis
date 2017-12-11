@@ -6,7 +6,6 @@ init:
 
 build:
 	cp config.json storm-project/multilang/resources/config.json
-	cp config.json ../frontend/config.json	
 	cd storm-project && mvn clean package
 
 kill:
@@ -21,5 +20,3 @@ deploy:
 listen:
 	cd listeners && python listeners.py
 
-web:
-	cd ../frontend && sudo python app.py
